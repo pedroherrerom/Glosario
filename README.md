@@ -9,6 +9,7 @@ Juego para practicar el vocabulario en inglés y español:
 Proporciona una palabra aleatoria de la base de datos glosario.db, y el usuario debe proporcionar la traducción
 
 Funcionalidades:
+
 Versión 1.1
 - Modos de juego: traducción de español a inglés y de inglés a español.
 - Tipo de palabra: permite elegir el tipo de palabra que aparece en el juego, entre sustantivos, adjetivos, adverbios / conectores, verbos o todas a la vez.
