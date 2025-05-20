@@ -4,15 +4,41 @@ from numpy import random as rd
 
 def conectar_bd(nombre_bd='glosario.db'):
     """Conecta a la base de datos SQLite y devuelve un DataFrame con los datos"""
-    """Corregido: no cerrar la conexión inmediatamente"""
     try:
         conexion = sqlite3.connect(nombre_bd)
         df = pd.read_sql_query("SELECT * FROM glosario", conexion)
-        conexion.close()  # Mover el cierre aquí
+        conexion.close()
         return df
     except sqlite3.Error as e:
         print(f"Error al conectar a la base de datos: {e}")
         return None
+
+def cargar_desde_csv(nombre_csv='glosariocsv.csv'):
+    """Carga datos desde un archivo CSV y adapta el formato al esperado por el programa"""
+    try:
+        df = pd.read_csv(nombre_csv)
+        
+        # Asegurar columnas mínimas requeridas
+        required_columns = ['traduccion_espanol', 'palabra_ingles', 'categoria']
+        for col in required_columns:
+            if col not in df.columns:
+                raise ValueError(f"Columna requerida '{col}' no encontrada en el CSV")
+        
+        return df
+    except Exception as e:
+        print(f"Error al cargar el archivo CSV: {e}")
+        return None
+
+def seleccionar_fuente_datos():
+    """Permite al usuario seleccionar la fuente de datos"""
+    while True:
+        try:
+            fuente = int(input("Selecciona fuente de datos:\n1. Base de datos SQLite\n2. Archivo CSV\n= "))
+            if fuente in [1, 2]:
+                return fuente
+            print("Por favor, introduce 1 o 2")
+        except ValueError:
+            print("Entrada inválida. Introduce 1 o 2")
 
 def seleccionar_modo():
     """Permite al usuario seleccionar el modo de juego"""
@@ -40,17 +66,15 @@ def seleccionar_tipo_palabra():
         except ValueError:
             print("Entrada inválida. Introduce 0, 1, 2, 3 o 4")
 
- 
-def buscador_tipo_palabra(tipo_palabra):
-    """Una vez seleccionada el tipo de palabra con el que se quiere jugar, esta función devuelve un dataframe con todas las palabras que sean de ese tipo"""
-    df = conectar_bd(nombre_bd='glosario.db')
+def buscador_tipo_palabra(tipo_palabra, df):
+    """Filtra el DataFrame según el tipo de palabra seleccionado"""
     if df is None:
         return None
         
     if tipo_palabra == "Adverbio":
         categoria = df[(df['categoria'] == 'Adverbio') | (df['categoria'] == 'Conector')]
     elif tipo_palabra == "Verbo":
-        categoria = df[(df['categoria'] == 'Verbo') | (df['categoria'] == 'Verbo frasal') | (df['categoria'] == 'Expresión') ]
+        categoria = df[(df['categoria'] == 'Verbo') | (df['categoria'] == 'Verbo frasal') | (df['categoria'] == 'Expresión')]
     elif tipo_palabra == 'Todas':
         categoria = df
     else:
@@ -63,11 +87,10 @@ def eliminar_palabra(df, posicion):
     try:
         return df.drop(df.index[posicion])
     except IndexError:
-        return df  # Si la posición no existe, devuelve el df sin cambios
+        return df
 
 def jugar_ronda(df, modo, indice):
     """Ejecuta una ronda del juego según el modo seleccionado"""
-    
     if modo == 1:  # Español → Inglés
         palabra = df["traduccion_espanol"].iloc[indice]
         respuesta_correcta = df["palabra_ingles"].iloc[indice]
@@ -86,8 +109,16 @@ def main():
     """Función principal que ejecuta el juego"""
     print("----------------------------------\nBienvenido al Juego de Vocabulario\n----------------------------------")
     
-    # Cargar datos
-    df = conectar_bd()
+    # Seleccionar fuente de datos
+    fuente = seleccionar_fuente_datos()
+    
+    # Cargar datos según la fuente seleccionada
+    if fuente == 1:
+        df = conectar_bd()
+    else:
+        nombre_csv = input("Introduce el nombre del archivo CSV (o presiona Enter para 'glosariocsv.csv'): ")
+        df = cargar_desde_csv(nombre_csv if nombre_csv else 'glosariocsv.csv')
+    
     if df is None or df.empty:
         print("No se pudieron cargar los datos del glosario.")
         return
@@ -96,32 +127,34 @@ def main():
     puntos = 0
     modo = seleccionar_modo()
     tipo_palabra = seleccionar_tipo_palabra()
-    df_filtrado = buscador_tipo_palabra(tipo_palabra)
+    df_filtrado = buscador_tipo_palabra(tipo_palabra, df)
     palabras_totales = len(df_filtrado)
-    print(f"Tienes que traducir {palabras_totales} palabras")
+    
     if df_filtrado is None or df_filtrado.empty:
         print("No hay palabras del tipo seleccionado.")
         return
     
+    print(f"Tienes que traducir {palabras_totales} palabras")
     continuar = True
     
     # Bucle principal del juego
     while continuar:
-        if palabras_totales==1:
-            indice=0
+        if palabras_totales == 1:
+            indice = 0
         else:
             indice = rd.randint(0, len(df_filtrado))
+        
         intento, respuesta = jugar_ronda(df_filtrado, modo, indice)        
         if intento.lower() == respuesta.lower():
             puntos += 1
             df_filtrado = eliminar_palabra(df_filtrado, indice)
             palabras_restantes = len(df_filtrado)
             print(f"¡Correcto! +1 punto (Total: {puntos})")
+            
             if palabras_restantes == 0:
                 print(f"Enhorabuena, has traducido correctamente {palabras_totales} palabras")
                 break
             print(f"Quedan {palabras_restantes} palabras de {palabras_totales}")
-
         else:
             print(f"Incorrecto. La respuesta correcta es: {respuesta}")
         
@@ -129,7 +162,7 @@ def main():
         opcion = input("\nPresiona Enter para continuar o cualquier otra tecla + Enter para salir: ")
         continuar = opcion == ''
     
-    print(f"\nJuego terminado. \nPuntos totales:  {puntos}")
+    print(f"\nJuego terminado. \nPuntos totales: {puntos}")
 
 if __name__ == "__main__":
     main()
