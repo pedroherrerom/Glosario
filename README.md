@@ -2,7 +2,7 @@ glosario.py
 
 Crea una base de datos llamada glosario.db, en ella se guarda: palabra en español, traducción en inglés, tipo de palabra (sustantivo, adjetivo, etc). Además genera una interfaz gráfica para que sea más comodo introducir las palabras
 
-juego_vocabulario
+juego_vocabulario.py
 
 Juego para practicar el vocabulario en inglés y español:
 
