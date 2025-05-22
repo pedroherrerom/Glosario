@@ -156,11 +156,11 @@ def main():
         intento, respuesta = jugar_ronda(df_filtrado, modo, indice)        
         if intento.lower() == respuesta.lower():
             puntos += 1
-            if ejemplo != None:
-                print(f"EJEMPLO DE USO: {ejemplo}")
             df_filtrado = eliminar_palabra(df_filtrado, indice)
             palabras_restantes = len(df_filtrado)
             print(f"¡Correcto! +1 punto (Total: {puntos})")
+            if ejemplo != None:
+                print(f"EJEMPLO DE USO: {ejemplo}")
             if palabras_restantes == 0:
                 print(f"Enhorabuena, has traducido correctamente {palabras_totales} palabras")
                 break
