@@ -33,7 +33,8 @@ def seleccionar_fuente_datos():
     """Permite al usuario seleccionar la fuente de datos"""
     while True:
         try:
-            fuente = int(input("Selecciona fuente de datos:\n1. Base de datos SQLite\n2. Archivo CSV\n= "))
+            fuente = 1
+            # int(input("Selecciona fuente de datos:\n1. Base de datos SQLite\n2. Archivo CSV\n= "))
             if fuente in [1, 2]:
                 return fuente
             print("Por favor, introduce 1 o 2")
@@ -89,6 +90,13 @@ def eliminar_palabra(df, posicion):
     except IndexError:
         return df
 
+def mostrar_ejemplo(df, indice):
+    """Muestra el ejemplo de la palabra si lo hay"""
+    ejemplo = df["ejemplo"].iloc[indice]
+    if ejemplo=="":
+        return None
+    return ejemplo
+
 def jugar_ronda(df, modo, indice):
     """Ejecuta una ronda del juego según el modo seleccionado"""
     if modo == 1:  # Español → Inglés
@@ -116,8 +124,9 @@ def main():
     if fuente == 1:
         df = conectar_bd()
     else:
-        nombre_csv = input("Introduce el nombre del archivo CSV (o presiona Enter para 'glosariocsv.csv'): ")
-        df = cargar_desde_csv(nombre_csv if nombre_csv else 'glosariocsv.csv')
+        # nombre_csv = input("Introduce el nombre del archivo CSV (o presiona Enter para 'glosariocsv.csv'): ")
+        # df = cargar_desde_csv(nombre_csv if nombre_csv else 'glosariocsv.csv')
+        df = cargar_desde_csv('glosariocsv.csv')
     
     if df is None or df.empty:
         print("No se pudieron cargar los datos del glosario.")
@@ -143,14 +152,15 @@ def main():
             indice = 0
         else:
             indice = rd.randint(0, len(df_filtrado))
-        
+        ejemplo = mostrar_ejemplo(df_filtrado, indice)
         intento, respuesta = jugar_ronda(df_filtrado, modo, indice)        
         if intento.lower() == respuesta.lower():
             puntos += 1
+            if ejemplo != None:
+                print(f"EJEMPLO DE USO: {ejemplo}")
             df_filtrado = eliminar_palabra(df_filtrado, indice)
             palabras_restantes = len(df_filtrado)
             print(f"¡Correcto! +1 punto (Total: {puntos})")
-            
             if palabras_restantes == 0:
                 print(f"Enhorabuena, has traducido correctamente {palabras_totales} palabras")
                 break
