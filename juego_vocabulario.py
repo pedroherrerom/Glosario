@@ -146,7 +146,7 @@ def main():
     print(f"Tienes que traducir {palabras_totales} palabras")
     continuar = True
     
-    # Bucle principal del juego
+    # Bucle principal del juego.
     while continuar:
         if palabras_totales == 1:
             indice = 0
