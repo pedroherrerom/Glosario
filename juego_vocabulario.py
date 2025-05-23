@@ -167,12 +167,14 @@ def main():
             print(f"Quedan {palabras_restantes} palabras de {palabras_totales}")
         else:
             print(f"Incorrecto. La respuesta correcta es: {respuesta}")
+            puntos -= 1
+            print(f"Menos un punto, (Total: {puntos})")
         
         # Preguntar si continuar
         opcion = input("\nPresiona Enter para continuar o cualquier otra tecla + Enter para salir: ")
         continuar = opcion == ''
     
-    print(f"\nJuego terminado. \nPuntos totales: {puntos}")
+    print(f"\nJuego terminado. \nPuntos totales: {puntos} de {palabras_totales}")
 
 if __name__ == "__main__":
     main()
